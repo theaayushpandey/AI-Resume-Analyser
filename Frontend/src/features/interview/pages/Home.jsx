@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
@@ -9,13 +9,27 @@ const Home = () => {
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ error, setError ] = useState("")
-    const resumeInputRef = useRef()
+    const [ resumeFile, setResumeFile ] = useState(null)
 
     const navigate = useNavigate()
 
+    // Used by both the file picker and drag & drop
+    const pickResume = (file) => {
+        if (!file) return
+        if (file.type !== "application/pdf") {
+            setError("Please choose a PDF file.")
+            return
+        }
+        if (file.size > 3 * 1024 * 1024) {
+            setError("That PDF is larger than 3MB.")
+            return
+        }
+        setError("")
+        setResumeFile(file)
+    }
+
     const handleGenerateReport = async () => {
         setError("")
-        const resumeFile = resumeInputRef.current.files[ 0 ]
         try {
             const data = await generateReport({ jobDescription, selfDescription, resumeFile })
             navigate(`/interview/${data._id}`)
@@ -81,13 +95,29 @@ const Home = () => {
                                 Upload Resume
                                 <span className='badge badge--best'>Best Results</span>
                             </label>
-                            <label className='dropzone' htmlFor='resume'>
+                            <label
+                                className='dropzone'
+                                htmlFor='resume'
+                                // Without preventDefault the browser opens the dropped PDF instead
+                                onDragOver={(e) => { e.preventDefault() }}
+                                onDrop={(e) => { e.preventDefault(); pickResume(e.dataTransfer.files[ 0 ]) }}>
                                 <span className='dropzone__icon'>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
                                 </span>
-                                <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
-                                <p className='dropzone__subtitle'>PDF only (Max 3MB)</p>
-                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf' />
+                                <p className='dropzone__title'>
+                                    {resumeFile ? `✓ ${resumeFile.name}` : 'Click to upload or drag & drop'}
+                                </p>
+                                <p className='dropzone__subtitle'>
+                                    {resumeFile ? 'Click to choose a different PDF' : 'PDF only (Max 3MB)'}
+                                </p>
+                                <input
+                                    hidden
+                                    type='file'
+                                    id='resume'
+                                    name='resume'
+                                    accept='.pdf'
+                                    onChange={(e) => { pickResume(e.target.files[ 0 ]) }}
+                                />
                             </label>
                         </div>
 
