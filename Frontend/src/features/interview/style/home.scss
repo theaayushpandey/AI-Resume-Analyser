@@ -12,6 +12,7 @@ $badge-required: #ff2d78;
 $badge-best:     #ff2d78;
 $info-bg:        #1b2a4a;
 $info-border:    #2d4a7a;
+$success:        #3fb950;
 $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 // ── Page Shell ───────────────────────────────────────────────────────────────
@@ -236,6 +237,48 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         font-size: 0.75rem;
         color: $text-muted;
         margin: 0;
+    }
+
+    &__file {
+        font-size: 0.8rem;
+        color: $text-primary;
+        margin: 0;
+        word-break: break-all;
+        text-align: center;
+    }
+
+    &__remove {
+        background: none;
+        border: none;
+        padding: 0;
+        color: $accent-alt;
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    // A file is being dragged over the box
+    &--dragging {
+        border-color: $accent;
+        background-color: rgba($accent, 0.1);
+    }
+
+    // A PDF has been chosen
+    &--ready,
+    &--ready:hover {
+        border-style: solid;
+        border-color: $success;
+        background-color: rgba($success, 0.08);
+    }
+
+    &--ready &__icon,
+    &--ready &__title {
+        color: $success;
+    }
+
+    &--ready &__title {
+        font-size: 1rem;
+        font-weight: 600;
     }
 }
 

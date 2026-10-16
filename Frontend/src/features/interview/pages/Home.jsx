@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
@@ -10,8 +10,18 @@ const Home = () => {
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ error, setError ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
+    const [ dragging, setDragging ] = useState(false)
+    const resumeInputRef = useRef()
 
     const navigate = useNavigate()
+
+    const removeResume = (e) => {
+        // The button sits inside the upload box; stop it from also opening the file picker
+        e.preventDefault()
+        e.stopPropagation()
+        setResumeFile(null)
+        resumeInputRef.current.value = "" // so picking the same file again still counts as a change
+    }
 
     // Used by both the file picker and drag & drop
     const pickResume = (file) => {
@@ -96,21 +106,34 @@ const Home = () => {
                                 <span className='badge badge--best'>Best Results</span>
                             </label>
                             <label
-                                className='dropzone'
+                                className={`dropzone ${resumeFile ? 'dropzone--ready' : ''} ${dragging ? 'dropzone--dragging' : ''}`}
                                 htmlFor='resume'
                                 // Without preventDefault the browser opens the dropped PDF instead
-                                onDragOver={(e) => { e.preventDefault() }}
-                                onDrop={(e) => { e.preventDefault(); pickResume(e.dataTransfer.files[ 0 ]) }}>
-                                <span className='dropzone__icon'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
-                                </span>
-                                <p className='dropzone__title'>
-                                    {resumeFile ? `✓ ${resumeFile.name}` : 'Click to upload or drag & drop'}
-                                </p>
-                                <p className='dropzone__subtitle'>
-                                    {resumeFile ? 'Click to choose a different PDF' : 'PDF only (Max 3MB)'}
-                                </p>
+                                onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                                onDragLeave={() => { setDragging(false) }}
+                                onDrop={(e) => { e.preventDefault(); setDragging(false); pickResume(e.dataTransfer.files[ 0 ]) }}>
+                                {resumeFile ? (
+                                    <>
+                                        <span className='dropzone__icon'>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="8 12.5 11 15.5 16 9.5" /></svg>
+                                        </span>
+                                        <p className='dropzone__title' role='status'>Resume uploaded</p>
+                                        <p className='dropzone__file'>{resumeFile.name} &bull; {Math.ceil(resumeFile.size / 1024)} KB</p>
+                                        <p className='dropzone__subtitle'>
+                                            Click to choose a different PDF &bull; <button type='button' className='dropzone__remove' onClick={removeResume}>Remove</button>
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className='dropzone__icon'>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
+                                        </span>
+                                        <p className='dropzone__title'>{dragging ? 'Drop your PDF here' : 'Click to upload or drag & drop'}</p>
+                                        <p className='dropzone__subtitle'>PDF only (Max 3MB)</p>
+                                    </>
+                                )}
                                 <input
+                                    ref={resumeInputRef}
                                     hidden
                                     type='file'
                                     id='resume'
