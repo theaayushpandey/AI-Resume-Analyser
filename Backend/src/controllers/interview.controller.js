@@ -10,27 +10,46 @@ const interviewReportModel = require("../models/interviewReport.model")
  */
 async function generateInterViewReportController(req, res) {
 
-    const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
-    const { selfDescription, jobDescription } = req.body
+    const { selfDescription = "", jobDescription = "" } = req.body
 
-    const interViewReportByAi = await generateInterviewReport({
-        resume: resumeContent.text,
-        selfDescription,
-        jobDescription
-    })
+    if (!jobDescription.trim()) {
+        return res.status(400).json({ message: "Please paste the job description." })
+    }
+    if (!req.file && !selfDescription.trim()) {
+        return res.status(400).json({ message: "Upload your resume (PDF) or write a short self-description." })
+    }
+    if (req.file && req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ message: "Only PDF resumes are supported. Save your resume as a PDF and upload it again." })
+    }
 
-    const interviewReport = await interviewReportModel.create({
-        user: req.user.id,
-        resume: resumeContent.text,
-        selfDescription,
-        jobDescription,
-        ...interViewReportByAi
-    })
+    try {
+        // The resume is optional: without one, the AI works from the self-description
+        const resumeText = req.file
+            ? (await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()).text
+            : ""
 
-    res.status(201).json({
-        message: "Interview report generated successfully.",
-        interviewReport
-    })
+        const interViewReportByAi = await generateInterviewReport({
+            resume: resumeText,
+            selfDescription,
+            jobDescription
+        })
+
+        const interviewReport = await interviewReportModel.create({
+            user: req.user.id,
+            resume: resumeText,
+            selfDescription,
+            jobDescription,
+            ...interViewReportByAi
+        })
+
+        res.status(201).json({
+            message: "Interview report generated successfully.",
+            interviewReport
+        })
+    } catch (err) {
+        console.error("generate report failed:", err.message)
+        res.status(500).json({ message: "Could not generate the report right now. Please try again." })
+    }
 
 }
 
