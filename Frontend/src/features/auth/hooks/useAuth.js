@@ -10,13 +10,17 @@ export const useAuth = () => {
     const { user, setUser, loading, setLoading } = context
 
 
+    // Turns an axios error into a message a person can read
+    const readableError = (err) =>
+        new Error(err.response?.data?.message || "Could not reach the server. Is the backend running?")
+
     const handleLogin = async ({ email, password }) => {
         setLoading(true)
         try {
             const data = await login({ email, password })
             setUser(data.user)
         } catch (err) {
-
+            throw readableError(err)
         } finally {
             setLoading(false)
         }
@@ -28,7 +32,7 @@ export const useAuth = () => {
             const data = await register({ username, email, password })
             setUser(data.user)
         } catch (err) {
-
+            throw readableError(err)
         } finally {
             setLoading(false)
         }

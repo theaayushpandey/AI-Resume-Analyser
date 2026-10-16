@@ -6,36 +6,24 @@ const api = axios.create({
     withCredentials: true
 })
 
+// register and login let errors through, so the page can show the server's message
 export async function register({ username, email, password }) {
 
-    try {
-        const response = await api.post('/api/auth/register', {
-            username, email, password
-        })
+    const response = await api.post('/api/auth/register', {
+        username, email, password
+    })
 
-        return response.data
-
-    } catch (err) {
-
-        console.log(err)
-
-    }
+    return response.data
 
 }
 
 export async function login({ email, password }) {
 
-    try {
+    const response = await api.post("/api/auth/login", {
+        email, password
+    })
 
-        const response = await api.post("/api/auth/login", {
-            email, password
-        })
-
-        return response.data
-
-    } catch (err) {
-        console.log(err)
-    }
+    return response.data
 
 }
 

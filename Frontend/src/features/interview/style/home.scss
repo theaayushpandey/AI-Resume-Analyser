@@ -1,422 +1,276 @@
-// ── Variables ────────────────────────────────────────────────────────────────
-$bg-page:        #0d1117;
-$bg-card:        #161b22;
-$bg-panel:       #1c2230;
-$bg-input:       #1e2535;
-$border-color:   #2a3348;
-$text-primary:   #e6edf3;
-$text-muted:     #7d8590;
-$accent:         #ff2d78;
-$accent-alt:     #ff6b9d;
-$badge-required: #ff2d78;
-$badge-best:     #ff2d78;
-$info-bg:        #1b2a4a;
-$info-border:    #2d4a7a;
-$success:        #3fb950;
-$font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-// ── Page Shell ───────────────────────────────────────────────────────────────
-.home-page {
-    width: 100%;
-    min-height: 100vh;
-    background-color: $bg-page;
-    color: $text-primary;
-    font-family: $font-stack;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1.5rem;
-    gap: 2rem;
-}
-
-// ── Page Header ──────────────────────────────────────────────────────────────
-.page-header {
+// ── Hero ─────────────────────────────────────────────────────────────────────
+.hero {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 96px 22px 64px;
     text-align: center;
 
-    h1 {
-        font-size: 2.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: $text-primary;
+    &__title {
+        margin-top: 8px;
+        font-size: clamp(44px, 7vw, 72px);
+        line-height: 1.05;
+        font-weight: 600;
+        letter-spacing: -0.04em;
     }
 
-    p {
-        color: $text-muted;
-        font-size: 0.95rem;
-        max-width: 480px;
+    &__lead {
+        margin: 20px auto 0;
+        max-width: 640px;
+        font-size: clamp(19px, 2.2vw, 24px);
+        line-height: 1.38;
+        letter-spacing: -0.015em;
+        color: var(--text-secondary);
+    }
+}
+
+// ── The two step cards on a grey band ───────────────────────────────────────
+.builder {
+    background-color: var(--bg-alt);
+    padding: 64px 22px 80px;
+
+    &__grid {
+        max-width: var(--page-width);
         margin: 0 auto;
-        line-height: 1.6;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
     }
 
-    .highlight {
-        color: $accent;
-    }
-}
-
-// ── Main Card ─────────────────────────────────────────────────────────────────
-.interview-card {
-    width: 100%;
-    max-width: 900px;
-    background-color: $bg-card;
-    border: 1px solid $border-color;
-    border-radius: 1rem;
-    overflow: hidden;
-
-    &__body {
+    &__actions {
+        max-width: var(--page-width);
+        margin: 36px auto 0;
         display: flex;
-        min-height: 520px;
-    }
-
-    &__footer {
-        display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
-        padding: 1rem 1.5rem;
-        border-top: 1px solid $border-color;
+        gap: 12px;
+        text-align: center;
+    }
 
-        .footer-info {
-            font-size: 0.8rem;
-            color: $text-muted;
-        }
+    &__note {
+        font-size: 14px;
+        color: var(--text-tertiary);
     }
 }
 
-// ── Panels ────────────────────────────────────────────────────────────────────
-.panel-divider {
-    width: 1px;
-    background-color: $border-color;
-    flex-shrink: 0;
-}
-
-.panel {
-    flex: 1;
+.step-card {
+    background-color: #fff;
+    border-radius: var(--radius-card);
+    padding: 32px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: 12px;
 
-    &__header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
-
-        h2 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: $text-primary;
-            flex: 1;
-        }
+    &__step {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-tertiary);
     }
 
-    &__icon {
-        display: flex;
-        align-items: center;
-        color: $accent;
+    &__title {
+        font-size: 32px;
+        line-height: 1.1;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+    }
+
+    &__hint {
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: var(--text-secondary);
     }
 
     &__textarea {
         flex: 1;
-        width: 100%;
-        background-color: $bg-input;
-        border: 1px solid $border-color;
-        border-radius: 0.5rem;
-        padding: 0.75rem 1rem;
-        color: $text-primary;
-        font-family: $font-stack;
-        font-size: 0.875rem;
-        resize: none;
-        outline: none;
-        transition: border-color 0.2s;
+        min-height: 280px;
+        resize: vertical;
         line-height: 1.5;
 
-        &::placeholder {
-            color: $text-muted;
-        }
-
-        &:focus {
-            border-color: $accent;
-        }
-
         &--short {
-            flex: unset;
-            height: 96px;
+            flex: none;
+            min-height: 110px;
         }
     }
 
-    &--left {
-        position: relative;
-
-        .char-counter {
-            position: absolute;
-            bottom: 2.25rem;
-            right: 2rem;
-            font-size: 0.75rem;
-            color: $text-muted;
-        }
-    }
-
-    &--right {
-        gap: 0.75rem;
+    &__counter {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        text-align: right;
     }
 }
 
-// ── Badges ────────────────────────────────────────────────────────────────────
-.badge {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.15rem 0.5rem;
-    border-radius: 0.3rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-
-    &--required {
-        background-color: rgba($badge-required, 0.15);
-        color: $badge-required;
-        border: 1px solid rgba($badge-required, 0.3);
-    }
-
-    &--best {
-        background-color: rgba($badge-best, 0.15);
-        color: $badge-best;
-        border: 1px solid rgba($badge-best, 0.3);
-    }
-}
-
-// ── Section Label ─────────────────────────────────────────────────────────────
-.section-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: $text-primary;
-    margin-bottom: 0.25rem;
-}
-
-// ── Dropzone ──────────────────────────────────────────────────────────────────
-.upload-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
+// ── Resume upload box ────────────────────────────────────────────────────────
 .dropzone {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    padding: 1.5rem 1rem;
-    background-color: $bg-input;
-    border: 2px dashed $border-color;
-    border-radius: 0.6rem;
+    gap: 4px;
+    padding: 28px 16px;
+    text-align: center;
+    background-color: #fbfbfd;
+    border: 1.5px dashed var(--hairline);
+    border-radius: 16px;
     cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 
     &:hover {
-        border-color: $accent;
-        background-color: rgba($accent, 0.05);
+        border-color: var(--accent);
     }
 
     &__icon {
-        color: $accent;
-        margin-bottom: 0.25rem;
+        margin-bottom: 6px;
+        color: var(--text-tertiary);
     }
 
     &__title {
-        font-size: 0.875rem;
+        font-size: 17px;
         font-weight: 500;
-        color: $text-primary;
-        margin: 0;
-    }
-
-    &__subtitle {
-        font-size: 0.75rem;
-        color: $text-muted;
-        margin: 0;
     }
 
     &__file {
-        font-size: 0.8rem;
-        color: $text-primary;
-        margin: 0;
+        font-size: 14px;
         word-break: break-all;
-        text-align: center;
     }
 
-    &__remove {
-        background: none;
-        border: none;
-        padding: 0;
-        color: $accent-alt;
-        font: inherit;
-        text-decoration: underline;
-        cursor: pointer;
+    &__subtitle {
+        font-size: 13px;
+        color: var(--text-tertiary);
     }
 
     // A file is being dragged over the box
     &--dragging {
-        border-color: $accent;
-        background-color: rgba($accent, 0.1);
+        border-color: var(--accent);
+        background-color: rgba(0, 113, 227, 0.05);
     }
 
     // A PDF has been chosen
     &--ready,
     &--ready:hover {
         border-style: solid;
-        border-color: $success;
-        background-color: rgba($success, 0.08);
+        border-color: var(--green);
+        background-color: rgba(36, 138, 61, 0.05);
     }
 
     &--ready &__icon,
     &--ready &__title {
-        color: $success;
+        color: var(--green);
     }
 
     &--ready &__title {
-        font-size: 1rem;
         font-weight: 600;
     }
 }
 
-// ── OR Divider ────────────────────────────────────────────────────────────────
 .or-divider {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    color: $text-muted;
-    font-size: 0.75rem;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-tertiary);
 
     &::before,
     &::after {
         content: '';
         flex: 1;
         height: 1px;
-        background-color: $border-color;
-    }
-
-    span {
-        white-space: nowrap;
+        background-color: var(--hairline);
     }
 }
 
-// ── Self Description ──────────────────────────────────────────────────────────
-.self-description {
+// ── Past plans ───────────────────────────────────────────────────────────────
+.plans {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 80px 22px 96px;
+
+    &__grid {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
+.section-title {
+    margin-bottom: 32px;
+    font-size: 40px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+}
+
+.plan-card {
+    width: 100%;
+    height: 100%;
+    padding: 28px;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-}
-
-// ── Info Box ──────────────────────────────────────────────────────────────────
-.info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    padding: 0.75rem 1rem;
-    background-color: $info-bg;
-    border: 1px solid $info-border;
-    border-radius: 0.5rem;
-
-    &__icon {
-        flex-shrink: 0;
-        color: #4a90e2;
-        margin-top: 1px;
-    }
-
-    p {
-        margin: 0;
-        font-size: 0.8rem;
-        color: #8ab4f8;
-        line-height: 1.5;
-
-        strong {
-            color: $text-primary;
-        }
-    }
-}
-
-// ── Generate Button ───────────────────────────────────────────────────────────
-.generate-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, $accent 0%, darken($accent, 10%) 100%);
-    color: #fff;
-    font-size: 0.9rem;
-    font-weight: 600;
+    gap: 2px;
+    text-align: left;
+    background-color: var(--bg-alt);
     border: none;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-card);
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    font-family: $font-stack;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 
     &:hover {
-        opacity: 0.9;
+        transform: scale(1.015);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
-    &:active {
-        transform: scale(0.98);
+    &__score {
+        font-size: 56px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: -0.04em;
     }
-}
 
-.recent-reports{
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
-    max-width: 900px;
+    &__score-label {
+        margin-bottom: 18px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
 
-    .reports-list{
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
+    &__title {
+        font-size: 19px;
+        line-height: 1.26;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
 
-        .report-item{
-            background-color: $bg-card;
-            border: 1px solid $border-color;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            cursor: pointer;
-            flex-shrink: 0;
+    &__date {
+        font-size: 14px;
+        color: var(--text-tertiary);
+    }
 
-            .match-score {
-                font-size: 0.8rem;
-                font-weight: 600;
-                color: $accent;
-                align-items: flex-start;
-            }
-        }
+    &__open {
+        margin-top: 16px;
+        font-size: 15px;
+        color: var(--link);
     }
 }
 
-
-// ── Page Footer ───────────────────────────────────────────────────────────────
-.page-footer {
-    display: flex;
-    gap: 1.5rem;
-
-    a {
-        font-size: 0.8rem;
-        color: $text-muted;
-        text-decoration: none;
-        transition: color 0.2s;
-
-        &:hover {
-            color: $text-primary;
-        }
+@media (prefers-reduced-motion: reduce) {
+    .plan-card:hover {
+        transform: none;
     }
 }
-// Message shown next to the Generate button when the server says no
-.form-error {
-    margin: 0;
-    color: $accent-alt;
-    font-size: 0.85rem;
+
+// ── Small screens ────────────────────────────────────────────────────────────
+@media (max-width: 834px) {
+    .builder__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 64px 22px 48px;
+    }
+
+    .step-card {
+        padding: 24px;
+    }
+
+    .section-title {
+        font-size: 32px;
+    }
 }

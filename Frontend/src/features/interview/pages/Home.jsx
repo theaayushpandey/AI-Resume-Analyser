@@ -2,10 +2,16 @@ import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import SiteNav from '../../../components/SiteNav'
+import SiteFooter from '../../../components/SiteFooter'
+import Loader from '../../../components/Loader'
+import { scoreBand } from '../score.js'
+
+const MAX_JOB_DESCRIPTION = 5000
 
 const Home = () => {
 
-    const { loading, generateReport,reports } = useInterview()
+    const { loading, generateReport, reports } = useInterview()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ error, setError ] = useState("")
@@ -40,6 +46,15 @@ const Home = () => {
 
     const handleGenerateReport = async () => {
         setError("")
+        // Same checks the server makes, so the answer is instant
+        if (!jobDescription.trim()) {
+            setError("Paste the job description first.")
+            return
+        }
+        if (!resumeFile && !selfDescription.trim()) {
+            setError("Add your resume, or describe yourself in a few lines.")
+            return
+        }
         try {
             const data = await generateReport({ jobDescription, selfDescription, resumeFile })
             navigate(`/interview/${data._id}`)
@@ -50,61 +65,56 @@ const Home = () => {
 
     if (loading) {
         return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
+            <>
+                <SiteNav />
+                <Loader
+                    title='Preparing your interview plan'
+                    hint='Reading the job description and your profile. This takes about 30 seconds.' />
+            </>
         )
     }
 
     return (
-        <div className='home-page'>
+        <>
+            <SiteNav />
+            <main>
 
-            {/* Page Header */}
-            <header className='page-header'>
-                <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
-                <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
-            </header>
+                {/* Hero */}
+                <section className='hero'>
+                    <p className='eyebrow'>Interview prep</p>
+                    <h1 className='hero__title'>Know what they’ll ask.</h1>
+                    <p className='hero__lead'>
+                        Paste a job description and add your resume. You’ll get the questions you’re likely
+                        to face, how to answer them, and a plan for the days before.
+                    </p>
+                </section>
 
-            {/* Main Card */}
-            <div className='interview-card'>
-                <div className='interview-card__body'>
+                {/* The two steps */}
+                <section className='builder'>
+                    <div className='builder__grid'>
 
-                    {/* Left Panel - Job Description */}
-                    <div className='panel panel--left'>
-                        <div className='panel__header'>
-                            <span className='panel__icon'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
-                            </span>
-                            <h2>Target Job Description</h2>
-                            <span className='badge badge--required'>Required</span>
-                        </div>
-                        <textarea
-                            onChange={(e) => { setJobDescription(e.target.value) }}
-                            className='panel__textarea'
-                            placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
-                            maxLength={5000}
-                        />
-                        <div className='char-counter'>0 / 5000 chars</div>
-                    </div>
-
-                    {/* Vertical Divider */}
-                    <div className='panel-divider' />
-
-                    {/* Right Panel - Profile */}
-                    <div className='panel panel--right'>
-                        <div className='panel__header'>
-                            <span className='panel__icon'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                            </span>
-                            <h2>Your Profile</h2>
+                        <div className='step-card'>
+                            <p className='step-card__step'>Step 1</p>
+                            <h2 className='step-card__title'>The role</h2>
+                            <p className='step-card__hint'>Paste the full job description.</p>
+                            <textarea
+                                className='input step-card__textarea'
+                                aria-label='Job description'
+                                value={jobDescription}
+                                onChange={(e) => { setJobDescription(e.target.value) }}
+                                placeholder='Responsibilities, requirements, nice-to-haves…'
+                                maxLength={MAX_JOB_DESCRIPTION}
+                            />
+                            <p className='step-card__counter'>
+                                {jobDescription.length.toLocaleString()} / {MAX_JOB_DESCRIPTION.toLocaleString()}
+                            </p>
                         </div>
 
-                        {/* Upload Resume */}
-                        <div className='upload-section'>
-                            <label className='section-label'>
-                                Upload Resume
-                                <span className='badge badge--best'>Best Results</span>
-                            </label>
+                        <div className='step-card'>
+                            <p className='step-card__step'>Step 2</p>
+                            <h2 className='step-card__title'>You</h2>
+                            <p className='step-card__hint'>Add your resume for the best results, or describe yourself in a few lines.</p>
+
                             <label
                                 className={`dropzone ${resumeFile ? 'dropzone--ready' : ''} ${dragging ? 'dropzone--dragging' : ''}`}
                                 htmlFor='resume'
@@ -115,21 +125,21 @@ const Home = () => {
                                 {resumeFile ? (
                                     <>
                                         <span className='dropzone__icon'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="8 12.5 11 15.5 16 9.5" /></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="8 12.5 11 15.5 16 9.5" /></svg>
                                         </span>
-                                        <p className='dropzone__title' role='status'>Resume uploaded</p>
-                                        <p className='dropzone__file'>{resumeFile.name} &bull; {Math.ceil(resumeFile.size / 1024)} KB</p>
+                                        <p className='dropzone__title' role='status'>Resume added</p>
+                                        <p className='dropzone__file'>{resumeFile.name} · {Math.ceil(resumeFile.size / 1024)} KB</p>
                                         <p className='dropzone__subtitle'>
-                                            Click to choose a different PDF &bull; <button type='button' className='dropzone__remove' onClick={removeResume}>Remove</button>
+                                            Click to replace · <button type='button' className='text-link' onClick={removeResume}>Remove</button>
                                         </p>
                                     </>
                                 ) : (
                                     <>
                                         <span className='dropzone__icon'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><polyline points="14 3 14 8 19 8" /><line x1="12" y1="17" x2="12" y2="11" /><polyline points="9.5 13.5 12 11 14.5 13.5" /></svg>
                                         </span>
-                                        <p className='dropzone__title'>{dragging ? 'Drop your PDF here' : 'Click to upload or drag & drop'}</p>
-                                        <p className='dropzone__subtitle'>PDF only (Max 3MB)</p>
+                                        <p className='dropzone__title'>{dragging ? 'Drop your PDF here' : 'Choose a PDF, or drag it here'}</p>
+                                        <p className='dropzone__subtitle'>Up to 3 MB</p>
                                     </>
                                 )}
                                 <input
@@ -142,69 +152,52 @@ const Home = () => {
                                     onChange={(e) => { pickResume(e.target.files[ 0 ]) }}
                                 />
                             </label>
-                        </div>
 
-                        {/* OR Divider */}
-                        <div className='or-divider'><span>OR</span></div>
+                            <div className='or-divider'><span>or</span></div>
 
-                        {/* Quick Self-Description */}
-                        <div className='self-description'>
-                            <label className='section-label' htmlFor='selfDescription'>Quick Self-Description</label>
                             <textarea
+                                className='input step-card__textarea step-card__textarea--short'
+                                aria-label='About you'
+                                value={selfDescription}
                                 onChange={(e) => { setSelfDescription(e.target.value) }}
-                                id='selfDescription'
-                                name='selfDescription'
-                                className='panel__textarea panel__textarea--short'
-                                placeholder="Briefly describe your experience, key skills, and years of experience if you don't have a resume handy..."
+                                placeholder='e.g. Final-year CS student. Built a React and Node.js app. Strong in data structures.'
                             />
                         </div>
-
-                        {/* Info Box */}
-                        <div className='info-box'>
-                            <span className='info-box__icon'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" stroke="#1a1f27" strokeWidth="2" /><line x1="12" y1="16" x2="12.01" y2="16" stroke="#1a1f27" strokeWidth="2" /></svg>
-                            </span>
-                            <p>Either a <strong>Resume</strong> or a <strong>Self Description</strong> is required to generate a personalized plan.</p>
-                        </div>
                     </div>
-                </div>
 
-                {/* Card Footer */}
-                <div className='interview-card__footer'>
-                    <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
-                    {error && <p className='form-error'>{error}</p>}
-                    <button
-                        onClick={handleGenerateReport}
-                        className='generate-btn'>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>
-                        Generate My Interview Strategy
-                    </button>
-                </div>
-            </div>
-
-            {/* Recent Reports List */}
-            {reports.length > 0 && (
-                <section className='recent-reports'>
-                    <h2>My Recent Interview Plans</h2>
-                    <ul className='reports-list'>
-                        {reports.map(report => (
-                            <li key={report._id} className='report-item' onClick={() => navigate(`/interview/${report._id}`)}>
-                                <h3>{report.title || 'Untitled Position'}</h3>
-                                <p className='report-meta'>Generated on {new Date(report.createdAt).toLocaleDateString()}</p>
-                                <p className={`match-score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>Match Score: {report.matchScore}%</p>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className='builder__actions'>
+                        {error && <p className='form-error' role='alert'>{error}</p>}
+                        <button onClick={handleGenerateReport} className='button primary-button button--large'>
+                            Create interview plan
+                        </button>
+                        <p className='builder__note'>Takes about 30 seconds.</p>
+                    </div>
                 </section>
-            )}
 
-            {/* Page Footer */}
-            <footer className='page-footer'>
-                <a href='#'>Privacy Policy</a>
-                <a href='#'>Terms of Service</a>
-                <a href='#'>Help Center</a>
-            </footer>
-        </div>
+                {/* Past plans */}
+                {reports.length > 0 && (
+                    <section className='plans'>
+                        <h2 className='section-title'>Your plans.</h2>
+                        <ul className='plans__grid'>
+                            {reports.map(report => (
+                                <li key={report._id}>
+                                    <button className='plan-card' onClick={() => navigate(`/interview/${report._id}`)}>
+                                        <span className={`plan-card__score score--${scoreBand(report.matchScore)}`}>{report.matchScore}</span>
+                                        <span className='plan-card__score-label'>match</span>
+                                        <span className='plan-card__title'>{report.title || 'Untitled role'}</span>
+                                        <span className='plan-card__date'>
+                                            {new Date(report.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
+                                        </span>
+                                        <span className='plan-card__open'>Open plan ›</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
+            </main>
+            <SiteFooter />
+        </>
     )
 }
 
