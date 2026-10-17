@@ -128,7 +128,10 @@ async function getMeController(req, res) {
 
     const user = await userModel.findById(req.user.id)
 
-
+    // The login cookie can outlive its account (e.g. the account was deleted)
+    if (!user) {
+        return res.status(401).json({ message: "Please sign in again." })
+    }
 
     res.status(200).json({
         message: "User details fetched successfully",
