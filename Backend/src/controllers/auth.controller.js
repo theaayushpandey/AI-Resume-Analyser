@@ -3,6 +3,15 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const tokenBlacklistModel = require("../models/blacklist.model")
 
+// Flags for the login cookie, shared by login, register and logout
+const tokenCookieOptions = {
+    httpOnly: true,                                  // page JavaScript cannot read the token, so XSS cannot steal it
+    sameSite: "lax",                                 // not sent on cross-site POSTs or fetches, which limits CSRF
+    secure: process.env.NODE_ENV === "production"    // HTTPS only in production; localhost runs on plain http
+}
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000              // same lifetime as the JWT (expiresIn: "1d")
+
 /**
  * @name registerUserController
  * @description register a new user, expects username, email and password in the request body
@@ -42,7 +51,7 @@ async function registerUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, { ...tokenCookieOptions, maxAge: ONE_DAY_MS })
 
 
     res.status(201).json({
@@ -88,7 +97,7 @@ async function loginUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, { ...tokenCookieOptions, maxAge: ONE_DAY_MS })
     res.status(200).json({
         message: "User loggedIn successfully.",
         user: {
@@ -112,7 +121,8 @@ async function logoutUserController(req, res) {
         await tokenBlacklistModel.create({ token })
     }
 
-    res.clearCookie("token")
+    // Clear with the same flags it was set with, so the browser replaces that exact cookie
+    res.clearCookie("token", tokenCookieOptions)
 
     res.status(200).json({
         message: "User logged out successfully"
