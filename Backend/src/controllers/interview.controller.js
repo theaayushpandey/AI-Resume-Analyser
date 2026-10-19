@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 const pdfParse = require("pdf-parse")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
@@ -94,7 +95,15 @@ async function getAllInterviewReportsController(req, res) {
 async function generateResumePdfController(req, res) {
     const { interviewReportId } = req.params
 
-    const interviewReport = await interviewReportModel.findById(interviewReportId)
+    // A malformed id can never match a report, and would make Mongoose throw a CastError (a 500)
+    if (!mongoose.isValidObjectId(interviewReportId)) {
+        return res.status(404).json({
+            message: "Interview report not found."
+        })
+    }
+
+    // Only the owner may download it: filtering by user returns 404 for anyone else's report
+    const interviewReport = await interviewReportModel.findOne({ _id: interviewReportId, user: req.user.id })
 
     if (!interviewReport) {
         return res.status(404).json({
