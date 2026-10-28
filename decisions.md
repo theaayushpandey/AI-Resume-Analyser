@@ -217,13 +217,13 @@ For how the code runs, see [flow.md](flow.md).
 ## Part B: Decisions from my changes (October 2026)
 
 #### B1. Make the resume optional, and give clear error messages
-- **Commit:** `9ed6c6b`
+- **Commit:** `7818cc2`
 - **Where:** `generateInterViewReportController`, `Home.jsx`, `useInterview.js`
 - **Why:** The page said the resume was optional, but the server read `req.file.buffer` right away, so it crashed when there was no file. Now a job description plus either a resume or a self-description is enough. Missing input or a non-PDF gets a 400 with a message saying what to fix. Gemini or database failures get a 500 with "please try again". The page shows these messages next to the button instead of failing silently.
 - **Trade-off:** Without a resume, the report can only be as good as the self-description.
 
 #### B2. Pin `@napi-rs/canvas` to 0.1.100 so pdf-parse loads on Windows ARM
-- **Commit:** `9ed6c6b`
+- **Commit:** `7818cc2`
 - **Where:** `Backend/package.json` (`"overrides": { "@napi-rs/canvas": "0.1.100" }`)
 - **Why:** pdf-parse needs `@napi-rs/canvas`, and the version that got installed had no Windows ARM64 build, so pdf-parse failed to load on my laptop. 0.1.100 is the first 0.1 version with an ARM64 build. npm `overrides` forces that version even though it's a dependency of a dependency.
 - **Instead of:** Running Node under x64 emulation (slow), or replacing pdf-parse.
@@ -235,19 +235,19 @@ For how the code runs, see [flow.md](flow.md).
 - **Trade-off:** Each machine needs the right path in its `.env`.
 
 #### B4. Drag and drop, and show which resume was chosen
-- **Commits:** `0e515ad`, `f8b61da`
+- **Commits:** `2bc449f`, `9a020a0`
 - **Where:** `Home.jsx` (`onDragOver`/`onDrop` with `preventDefault`, `pickResume`, `removeResume`)
 - **Why:** Without `preventDefault`, the browser opens the dropped PDF instead of handing it to the page. After choosing a file, the box now shows "Resume added" with the name and size, so it's obvious it worked. `removeResume` clears the file input, so picking the same file again still counts as a change.
 - **Trade-off:** None.
 
 #### B5. Check the form in the browser too, with the same rules as the server
-- **Commit:** `ce0e9ef`
+- **Commit:** `a4aeabf`
 - **Where:** `Home.jsx › pickResume` (PDF only, 3 MB or less), `handleGenerateReport` (job description required, resume or self-description required)
 - **Why:** The user gets an answer instantly instead of after a server round trip. The server still checks everything, because browser checks can be skipped.
 - **Trade-off:** The rules live in two places and must be kept in sync.
 
 #### B6. Frontend redesign: smaller decisions inside it
-- **Commit:** `ce0e9ef`
+- **Commit:** `a4aeabf`
 - **Where:** `Home.jsx`, `Interview.jsx`, `score.js`, `SiteFooter.jsx`, `useAuth.js`, `useInterview.js`, styles
 - **Decisions:**
   - **Score bands in one place.** `score.js › scoreBand`: 80 and up is "Strong match", 60 and up is "Good match", below that is "Needs work". The home cards and the report page use the same function, so they always agree.
@@ -258,18 +258,18 @@ For how the code runs, see [flow.md](flow.md).
   - **Tell people how long it takes.** "Takes about 30 seconds" for the report, "about 20 seconds" for the PDF. Waiting feels shorter when you know what to expect.
 
 #### B7. `get-me` answers 401 when the account no longer exists
-- **Commit:** `2bdf5a4`
+- **Commit:** `cc8871c`
 - **Where:** `getMeController`
 - **Why:** A valid cookie can outlive its account. The code read `user._id` on `null` and crashed. Now it answers 401 "Please sign in again.", and the frontend sends the person to the login page.
 
 #### B8. Only the owner can download a tailored resume, and a bad id gives 404
-- **Commit:** `1c6492e`
+- **Commit:** `2355fc0`
 - **Where:** `generateResumePdfController`
 - **Why:** The PDF route looked the report up by id alone (`findById`). Any logged-in user who had or guessed a report id could download another person's resume, with their name, phone and work history. MongoDB ids are not random: they start with a timestamp and count up, so they can be guessed. Now the query is `findOne({ _id, user: req.user.id })`, like the other report routes, and "not yours" gets 404. A badly formed id is checked first with `mongoose.isValidObjectId`, so it gets 404 instead of a 500 crash.
 - **Trade-off:** None. This was a security bug.
 
 #### B9. Safe settings on the login cookie
-- **Commit:** `01dce09`
+- **Commit:** `ffd9f1c`
 - **Where:** `auth.controller.js › tokenCookieOptions`
 - **Why:** The cookie was set with no options. Now:
   - `httpOnly: true`: page scripts can't read the token, so an injected script can't steal it.
@@ -280,7 +280,7 @@ For how the code runs, see [flow.md](flow.md).
 - **Note:** `localhost:5173` and `localhost:3000` count as the same "site" (the port doesn't matter for `sameSite`), so the frontend's requests still carry the cookie.
 
 #### B10. Index the blacklist and let MongoDB delete old entries
-- **Commit:** `f9927ae`
+- **Commit:** `7ac5a18`
 - **Where:** `blacklist.model.js` (`index: true` on `token`; TTL index on `createdAt` with `expireAfterSeconds: 86400`)
 - **Why:** `authUser` searches the blacklist on every logged-in request. With no index, each search read the whole collection, and the collection grew with every logout, so every request got slower over time. The index makes the lookup fast. The TTL index makes MongoDB delete each entry after one day. That's safe, because by then the token has expired and `jwt.verify` refuses it anyway.
 - **Note:** MongoDB's cleanup runs about once a minute, so entries go a little after the 24 hours.
